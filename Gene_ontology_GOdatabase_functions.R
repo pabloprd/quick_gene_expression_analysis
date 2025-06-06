@@ -1,105 +1,101 @@
-#GO Annotation stuff
+#Summmary Stats and Differential Gene expression:
+#By: Paul Parodi
+#Last updated: 6/6/2025
 
 
-#Gene Ontology for just the genes you are looking at. You can change the pvalue and q value to much higher ones
-#If you need it.
+
+#' Pairwise differential gene expression with Limma
+#'
+#' This function runs pairwise differential expression using the Limma package between the two groups you are comparing in a column
+#'
+#' @param normalized_counts  Dataframe of your normalized counts with sample names at the top and genes as the index.
+#' @param metadata_table Metadata table associated with your dataframe
+#' @param testing_column Column you are conducting the pairwise comparison in
+#' @param column1 One of the categorical group names you are comparing 'Male'
+#' @param column2 Another of the categorical group names you are comparing 'Female'
+#'
+#'
+#' @return A data matrix containing the differential gene expression between two groups. Returns measurements logFC, Average expression, test statistic, P. Value, adjusted P. Value, and B statistic
+#'
+#' @examples
+#' # Limma_dge_prep(normalized_counts_dataframe, metadata_table, 'Sex", 'M', 'F')
+#'
 #' @export
-GO_annotations_panel <- function(raw_counts, table, normalized_counts, pvalcutoff = 0.05, qvalcutoff = 0.01){
-  list_of_genes <- raw_counts$Name
-  genes <- rownames(normalized_counts)
+Limma_dge_prep <- function(normalized_counts, metadata_table, testing_column, column1, column2){
+  #May have to edit this later to not remove the last three columns as I'll just insert the table with those columns taken out
 
-  #Getting the entrez_ids
-  all_entrez_ids <- bitr(list_of_genes, fromType = 'SYMBOL', toType = 'ENTREZID',  OrgDb = org.Hs.eg.db)
-  entrez_ids <- bitr(genes, fromType = 'SYMBOL', toType = 'ENTREZID',  OrgDb = org.Hs.eg.db)
+  #Creating matrices and groups
+  matrix_of_counts <- as.matrix(normalized_counts) # Make the matrix of just the counts. change variable name to be better.
+  sample_names <- metadata_table[[testing_column]] # The sample names of the metadata column you are looking at
+  group <- factor(sample_names) # Grouping the factors of the sample_names
+  design <- model.matrix(~0 + group) # Creating a matrix of the new groups
+  colnames(design) <- levels(group) # Make the different levels of the group the column names of the new thing.
 
-  #Universe vectors
-  valid_entrez <- keys(org.Hs.eg.db, keytype = "ENTREZID")  #Getting all the valid entrezid that are in the GO database
-  universe_vec <- as.character(all_entrez_ids$ENTREZID)
-  universe_vec <- universe_vec[universe_vec %in% valid_entrez]
-  universe_vec <- unique(universe_vec)                     #Get the unique and valid entrez ids for the panel
+  #First linear model
+  fit <- lmFit(matrix_of_counts, design)
 
-  #Calling the GO database
-  ego <- enrichGO(gene          = as.character(entrez_ids$ENTREZID),
-                  universe      = universe_vec, # Background gene list (optional, defaults to all genes in the annotation database)
-                  OrgDb         = org.Hs.eg.db,
-                  ont           = "BP", # Options: "BP" (Biological Process), "MF" (Molecular Function), "CC" (Cellular Component), "ALL"
-                  pAdjustMethod = "BH", # Benjamini-Hochberg for multiple testing correction
-                  pvalueCutoff  = pvalcutoff,
-                  qvalueCutoff  = qvalcutoff,
-                  readable = TRUE) # More stringent cutoff for adjusted p-value
-  return(data.frame(ego))
+  #Contrast matrix
+  contrast_name = paste0(column1, 'v', column2) # Make the title
+  contrast_formula <- paste0(column1, "-" ,column2) # Putting in the title
+
+  contrast.matrix <- limma::makeContrasts(contrasts = setNames(contrast_formula, contrast_name),
+                                          levels = design) #Creating the contrast matrix that compares the groups
+
+  #More refined linear model
+  fit2 <- contrasts.fit(fit, contrast.matrix) #making the linear model based off this contrast matrix
+  fit2 <- eBayes(fit2) #running Bayesian correction on the model
+  Results <- topTable(fit2, adjust.method = 'fdr', number = Inf) #Outputting the files to results.
+
+  return(Results)
 }
 
 
-#Gene Ontology for the whole genome. Don't have to change the pvalues but you can.
+#' Calculating summary stats and pairwise gene expression
+#'
+#' This function calculates the summary stats and whether the two groups you are comparing have statistically significant differences in gene expression
+#'
+#' @param normalized_counts  Dataframe of your normalized counts with sample names at the top and genes as the index.
+#' @param metadata_table Metadata table associated with your dataframe
+#' @param testing_column Column you are conducting the pairwise comparison in
+#' @param column1 One of the categorical group names you are comparing ex: 'Male'
+#' @param column2 Another of the categorical group names you are comparing ex: 'Female'
+#' @param sample_char The character that the sample name starts with
+#' @param sample_col_name The column name in the metadata that has the sample names. It automatically assigns it as "Sample Name"
+#'
+#' @return A data matrix containing the summary stats and differential gene expression between two groups. Returns measurements means, samples, differences of each sample,  logFC, Average expression, test statistic, P. Value, adjusted P. Value, and B statistic
+#'
+#' @examples
+#' # sumstats_and_dge(normalized_counts_dataframe, metadata_table, 'Sex", 'M', 'F', 'GS', "Sample Name)
+#'
 #' @export
-GO_annotations_global <- function(raw_counts, table, normalized_counts, pvalcutoff = 0.05, qvalcutoff = 0.01){
-  list_of_genes <- raw_counts$Name
-  genes <- rownames(normalized_counts)
-  entrez_ids <- bitr(genes, fromType = 'SYMBOL', toType = 'ENTREZID',  OrgDb = org.Hs.eg.db)
+sumstats_and_dge <- function(normalized_counts, metadata_table, testing_column, column1, column2, sample_char = NULL, sample_col_name = "Sample Name")
+{
+  #Core DGE analysis (unchanged)
+  dge_limma_table <- Limma_dge_prep(normalized_counts, metadata_table, testing_column, column1, column2)
 
-  #Calling the GO database
-  ego <- enrichGO(gene          = as.character(entrez_ids$ENTREZID),
-                  universe      = , # Background gene list (optional, defaults to all genes in the annotation database)
-                  OrgDb         = org.Hs.eg.db,
-                  ont           = "BP", # Options: "BP" (Biological Process), "MF" (Molecular Function), "CC" (Cellular Component), "ALL"
-                  pAdjustMethod = "BH", # Benjamini-Hochberg for multiple testing correction
-                  pvalueCutoff  = pvalcutoff,
-                  qvalueCutoff  = qvalcutoff,
-                  readable = TRUE) # More stringent cutoff for adjusted p-value
-  return(data.frame(ego))
-}
+  #Unified summary stats calculation
+  get_group_stats <- function(group){
+    tbl <- normalized_counts %>%
+      gene_tables(metadata_table, sample_col_name, testing_column, group, sample_char)
 
-#GO_PVALUE_FINDER: RETURNS THE DESCRIPTION OF FUNCTION OF THE GENE ANNOTATION
-#WITH THE LOWEST ADJUSTED P-VALUE (HIGHEST LIKELIHOOD)
-#' @export
-GO_pvalue_finder <- function(gene, annotations, comparison_table){
-  sorted_annotations <- annotations[order(annotations$p.adjust), ]
-  for(i in 1:nrow(sorted_annotations)){
-    row <- sorted_annotations[i, ]
-    if (gene %in% unlist(strsplit(row$geneID, "/"))){
-      return(row$Description)
-    }
+    tbl_stats <- t(apply(tbl, 1, \(row) {
+      numeric_row <- as.numeric(row)
+      c(mean = mean(numeric_row, na.rm = TRUE),
+        total_samples = sum(!is.na(numeric_row)),
+        Max_difference = abs(max(numeric_row) - min(numeric_row)))
+    }))
+
+    stats_df <- data.frame(tbl_stats)
+    colnames(stats_df) <- paste0(group, c('_mean', '_total_samples', '_Max_difference'))
+    stats_df
   }
-  return(NA)
-}
+  #Process both groups
+  ss1 <- get_group_stats(column1)
+  ss2 <- get_group_stats(column2)[rownames(ss1),] #organizing the row names
 
+  #Final Integration
+  cbind(ss1, ss2, dge_limma_table[rownames(ss1), ])
 
-#GO_DEFINITIONS_TO_TABLE: TAKES IN TABLES, ANNOTATIONS, AND NORMALIZED COUNTS TO OUTPUT A TABLE
-#WITH THE TOP ANNOTATION ALREADY ATTACHED
-#' @export
-GO_definitions_to_table <- function(comparison_table, normalized_counts, annotations){
-  #annotations <- GO_annotations(comparison_table, normalized_counts)
-  #list_of_genes <- normalized_counts$Name #this is the issue
-  list_of_genes <- rownames(normalized_counts)
-  comparison_table$Description <- NA
-  for(gene in list_of_genes){
-    print(gene)
-    description <- GO_pvalue_finder(gene, annotations, comparison_table)
-    row_num <- which(rownames(comparison_table) == gene)
-    comparison_table$Description[row_num] = description
-
-  }
-  return(comparison_table)
-}
-
-#' @export
-Go_anno_selection <- function(gene, annotation_df, num){
-  sorted_annotations <- annotation_df[order(annotation_df$pvalue), ]
-  table <- sorted_annotations %>% filter(grepl(gene, geneID))
-  selected_table <- table %>% slice_min(order_by = p.adjust, n = num)
-  return(selected_table)
-}
-
-#Go annotations lists
-#' @export
-entrez_id_list <- function(raw_counts, normalized_counts){
-  list_of_genes <- raw_counts$Name
-  genes <- rownames(normalized_counts)
-  #Getting the entrez_ids
-  all_entrez_ids <- bitr(list_of_genes, fromType = 'SYMBOL', toType = 'ENTREZID',  OrgDb = org.Hs.eg.db)
-  entrez_ids <- bitr(genes, fromType = 'SYMBOL', toType = 'ENTREZID',  OrgDb = org.Hs.eg.db)
-  return(entrez_ids$ENTREZID)
 }
 
 
