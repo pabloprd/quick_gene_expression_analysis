@@ -1,4 +1,4 @@
-#R35 Moore Nanostring Analysis Functions
+# R35 Moore Nanostring Analysis Functions
 
 This is an R package that is created for ease of use for pairwise and 
 multiple differential pairwise gene expression. It streamlines a lot of code into functions
