@@ -1,15 +1,30 @@
-#Plotting functions
+#PLOTTING FUNCTIONS
+#By: Paul Parodi
+#6/6/2025
 
-
-#Boxplot plotting function
+#' Single gene boxplot
+#'
+#' This function boxplots a column of your choice and a gene of your choice and allows you to compare them.
+#'
+#' @param counts Dataframe of normalized counts
+#' @param metadata_table Metadata table associated with your dataframe
+#' @param column Metadata table column you are interested in age, sex, etc.
+#' @param gene Gene you want to visualize the expression of ex: 'CD4'
+#' @param sample_names column that the sample names are under in the metadata.
+#'
+#'
+#' @return a nice boxplot comparing groups
+#'
+#' @examples
+#' # Single_gene_boxplot(normalized_counts, metadata_tablee , 'Ancestry', 'CCL4', "Sample Name")
 
 #' @export
-Single_gene_boxplot <- function(counts, metadata_table, column, gene, column_name){
+Single_gene_boxplot <- function(counts, metadata_table, column, gene, sample_names = "Sample Name"){
   merged_gene_dataframe <-counts %>%
     as.data.frame() %>%
     rownames_to_column("Gene") %>%
-    pivot_longer(-Gene, names_to = paste0(column_name), values_to = "Expression") %>%
-    inner_join(metadata_table, by = paste0(column_name)) %>%
+    pivot_longer(-Gene, names_to = paste0(sample_names), values_to = "Expression") %>%
+    inner_join(metadata_table, by = paste0(sample_names)) %>%
     filter(Gene == gene)
 
   merged_gene_dataframe[[column]] <- as.factor(merged_gene_dataframe[[column]])
@@ -18,7 +33,7 @@ Single_gene_boxplot <- function(counts, metadata_table, column, gene, column_nam
     geom_boxplot(color = "black", size = 0.7) +
     scale_fill_viridis_d(option = "viridis", alpha = 0.8) +
     geom_jitter(width = 0.2, color = "gray20", alpha = 0.7) +
-    labs(title = paste("Expression of", gene), x = column , y = "Expression") +
+    labs(title = paste("Normalized Expression of", gene), x = column , y = "Expression") +
 
     #coord_cartesian(xlim = c(0, 5), ylim = c(-10, 6))+ #You can take this out potentially and just have it vary between groups
 
@@ -30,61 +45,23 @@ Single_gene_boxplot <- function(counts, metadata_table, column, gene, column_nam
     )
 }
 
-#Heat mapping function
-#' @export
-heatmapping_function <-function(comparison_table, column_name_TO, top_gene_nums = 0, bottom_gene_nums = 0){
-  if (top_gene_nums != 0) {
-    top <- top_selection(comparison_table, column_name_TO, top_gene_nums)
-    if(bottom_gene_nums!= 0){
-      bottom <- bottom_selection(comparison_table, column_name_TO, bottom_gene_nums)
-      combo <- rbind(top, bottom)
-    }
-    else{
-      combo <- top
-    }
-  }
-  else{
-    bottom <- bottom_selection(comparison_table, column_name_TO, bottom_gene_nums)
-    combo <- bottom
-  }
-  combo <- combo[ , !(names(combo) %in% c("P.Value", "adj.P.Val"))]
-  combo <- arrange(combo, column_name_TO)
-  data <- as.matrix(combo)
-  heat <- pheatmap((data), legend = TRUE, cluster_rows = FALSE)
-  return(heat)
-}
+
+#' Plotting group ontology
+#'
+#' Function to produce ontology plots for a gene list that you specify
+#'
+#' @param gene_list gene list
+#' @param level level of ontology you want to look at 1,2,3,4
+#'
+#'
+#' @return a plot of gene counts per ontology group
+#'
+#' @examples
+#' group_ontology_plot(list_of_genes, 3)
 
 
 #' @export
-heatmapping_data_export <-function(comparison_table, column_name_TO, top_gene_nums = 0, bottom_gene_nums = 0){
-  if (top_gene_nums != 0) {
-    top <- top_selection(comparison_table, column_name_TO, top_gene_nums)
-    if(bottom_gene_nums!= 0){
-      bottom <- bottom_selection(comparison_table, column_name_TO, bottom_gene_nums)
-      combo <- rbind(top, bottom)
-    }
-    else{
-      combo <- top
-    }
-  }
-  else{
-    bottom <- bottom_selection(comparison_table, column_name_TO, bottom_gene_nums)
-    combo <- bottom
-  }
-  combo <- combo[ , !(names(combo) %in% c("P.Value", "adj.P.Val"))]
-  #combo <- combo[ , "logFC", drop = FALSE]
-  combo <- arrange(combo, column_name_TO)
-  data <- as.matrix(combo)
-  return(data)
-}
-
-
-
-
-
-#What the group doing ontology wise plotting
-#' @export
-group_ontology_plot <- function(gene_list, level){
+group_ontology_plot <- function(gene_list, level = 1){
   ggo <- groupGO(gene     = gene_list,
                  OrgDb    = org.Hs.eg.db,
                  ont      = "BP",
@@ -93,9 +70,16 @@ group_ontology_plot <- function(gene_list, level){
   return(barplot(ggo))
 }
 
+
+
 #The enrichment of the genes and stuff
+#Plots gene ratios below a certain p-value that you specify and shows the function they are associated with
+#Gene ratio: statistic commonly used in GO or pathway enrichment analyses to describe the
+#Proportion of your input genes that are associated with a specific GO term or pathway
+# Gene ratio = Number of input genes annotated to a term/total number of input genes
+
 #' @export
-enrichment_plot <- function(gene_list, pval, qval){
+enrichment_plot <- function(gene_list, pval = 0.05, qval = 0.01){
   ego <- enrichGO(gene         = gene_list,
                   OrgDb        = org.Hs.eg.db,
                   ont          = "BP",       # BP: Biological Process
@@ -106,3 +90,6 @@ enrichment_plot <- function(gene_list, pval, qval){
 
   return(dotplot(ego))
 }
+
+
+
