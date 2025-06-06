@@ -1,9 +1,21 @@
 #GENE ONTOLOGY GPROFILER FUNCTIONS
 #By: Paul Parodi
-#Last updated: 6/4/2025
+#Last updated: 6/6/2025
 
 
-#Returning the annotations table for gprofiler2
+
+
+#' gprofiler Gene ontology
+#'
+#' Makes an annotation table using gprofiler.
+#'
+#' @param eids list of gene eids
+#'
+#' @return a data matrix of annotated genes using the gprofiler database
+#'
+#' @examples
+#' # gprofiler(list_of_eids)
+#'
 #' @export
 gprofiler <- function(eids){
   gprofiletable <- gost(
@@ -16,8 +28,19 @@ gprofiler <- function(eids){
   return(gprofiletable)
 }
 
-
-#Making a bar plot based off those gprofiler2 annotations
+#' gprofiler ontology barplot
+#'
+#' Makes a barplot of the counts in relation to each gene ontology term that comes up using the gprofiler database
+#'
+#' @param gplot
+#' @param num1
+#' @param num2
+#'
+#' @return a barplot of the counts in relation to each gene ontology term.
+#'
+#' @examples
+#' # gprofiler_barplot()
+#'
 #' @export
 gprofiler_barplot <- function(gplot ,num1, num2){
   top_terms <- gplot$result[num1:num2, ]
@@ -29,12 +52,22 @@ gprofiler_barplot <- function(gplot ,num1, num2){
 }
 
 
-#Mapping the gene ids to the names in the table that you are interested in
+#' Mapping the gene ids to gprofiler terms
+#'
+#' Turns your dataframe into an annotated dataframe with gprofiler gene terms.
+#'
+#' @param Table Your dataframe of normalized counts, or any dataframe that has genes as the index and the gene ids
+#' @param id_col Name of the column in df with comma-seperated gene IDs (as string)
+#' @param id_to_name_map Named vector (names are gene IDs, values are gene names) or data frame with
+#' @param new_col The new column name that you want for the gene names
+#'
+#' @return a barplot of the counts in relation to each gene ontology term.
+#'
+#' @examples
+#' # gene_gprofile_mapping(dataframe, geneID, id_to_name_mapping_list, 'gene_names')
+#'
+#' @export
 gene_gprofile_mapping <- function(Table, id_col, id_to_name_map, new_col = "gene_names"){
-  #id_col: Name of the column in df with comma-seperated gene IDs (as string)
-  #id_to_name_map: Named vector (names are gene IDs, values are gene names) or data frame with
-  #id and name columns
-  #If id_to_name map is a dataframe, conver to named vector
   if (is.data.frame(id_to_name_map)) {
     id_to_name_map <- setNames(as.character(id_to_name_map[[2]]), as.character(id_to_name_map[[1]])
     )
@@ -50,7 +83,21 @@ gene_gprofile_mapping <- function(Table, id_col, id_to_name_map, new_col = "gene
   return(Table)
 }
 
-#Mapping the entrez ids to the genes and then pasting them on the table.
+#' Mapping genes to entrez ids
+#'
+#' Turns your dataframe into an annotated dataframe with gprofiler gene terms.
+#'
+#' @param Table Your dataframe of normalized counts, or any dataframe that has genes as the index and the gene ids
+#' @param id_col Name of the column in df with comma-seperated gene IDs (as string)
+#' @param id_to_name_map Named vector (names are gene IDs, values are gene names) or data frame with
+#' @param new_col The new column name that you want for the gene names
+#'
+#' @return a dataframe of gprofiler annotated terms.
+#'
+#' @examples
+#' # gene_entrez_gprofile_mapping(dataframe, column_of_ids, normalized counts)
+#'
+#' @export
 gene_entrez_gprofile_mapping <- function(Table, id_col, norm_counts){
   genes <- rownames(norm_counts)
   E_ids <- entrez_id_list(norm_counts, norm_counts)
