@@ -40,5 +40,11 @@ Volcano plot gene expression
 
 ## Acknowledgments
 This package was created for the Moore Lab at University of Maryland for quicker R analysis and visualization.
+<br>
+
 Created by Paul Parodi
+
+<br>
+
 Last updated: 6/9/2025
+
