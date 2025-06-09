@@ -18,6 +18,7 @@ I will describe the input data here. You will only be working with RCC files and
 - You will need to read in the counts from the RCC file so they look like this:
  
 <br> 
+
 ![Screenshot of the application](./Raw_counts_table.png)
 
 
