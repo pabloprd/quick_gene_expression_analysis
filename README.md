@@ -7,7 +7,16 @@ and multiple differential pairwise gene expression. There are also some plotting
 that include a boxplot, barplots, and a good volcano plot. 
 
 ## Workflow
+- Comparing columns with only 2 variables (Pairwise comparison):
+  sumstats_and_dge(normalized_counts, metadata, "Feature column", "group1", "group2", "Character the sample starts with")
+  ex: sumstats_and_dge(normalized_counts, mmetadata, 'Sex', 'Male', 'Female', 'NA')
 
+- Comparing columns with >2 variables (Multivariate comparison or ANOVA)
+  Limma_mdge_results(normalized_counts, metadata, column of interest)
+  ex: Limma_mdge_results(normalized_counts, mmetadata, 'Total_Discrimination')
+
+Both of these output a table with the fold change and the adjusted p value which should give you an idea on any significant differences.
+To investigate further with a multivariate comparison do a pairwise comparison between the features with the highest log fold change.
 
 
 
