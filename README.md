@@ -27,11 +27,15 @@ I will describe the input data here. You will only be working with RCC files and
 Example output figures:
 
 Boxplot gene expression
+
 <br>
+
 ![Screenshot of the application](./CCL4_expression.png)
 
 Volcano plot gene expression
+
 <br>
+
 ![Screenshot of the application](./Ancestry_gene_expression.png)
 
 ## Code Structure
