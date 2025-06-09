@@ -1,6 +1,6 @@
 # R35 Moore Nanostring Analysis Functions
 
-This is an R package that is created for ease of use for pairwise and 
+This is a simple and specific R package that is created for ease of use for pairwise and 
 multiple differential pairwise gene expression. It streamlines a lot of code into functions
 so your R code is neater and easier to read. This package specifically only uses limma for pairwise
 and multiple differential pairwise gene expression. There are also some plotting functions
@@ -23,13 +23,8 @@ Show example outputs or figures.
 - /scripts/: Analysis scripts
 - /data/: Example datasets
 
-## Contributing
-
-Guidelines for contributing to the project.
-
 ## Acknowledgments
 
-Credit collaborators, funders, and sources.
 
 ## License
 
