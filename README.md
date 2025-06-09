@@ -38,15 +38,7 @@ Volcano plot gene expression
 
 ![Screenshot of the application](./Ancestry_gene_expression.png)
 
-## Code Structure
-
-- /scripts/: Analysis scripts
-- /data/: Example datasets
-
-
 ## Acknowledgments
-
-
-## License
-
-MIT (or other) license.
+This package was created for the Moore Lab at University of Maryland for quicker R analysis and visualization.
+Created by Paul Parodi
+Last updated: 6/9/2025
