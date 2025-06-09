@@ -8,11 +8,16 @@ that include a boxplot, barplots, and a good volcano plot.
 
 ## Workflow
 
-Example code to get users started.
+These functions only work with 
+
 
 ## Input Data
 
-I will describe the input data here. Mostly you will be working with RCC files. 
+I will describe the input data here. You will only be working with RCC files and an associated metadata.csv file  
+- You will need a metadata file with the sample names along with the associated features
+- You will need to read in the counts from the RCC file so they look like this:
+- insert image here
+
 
 ## Results
 
