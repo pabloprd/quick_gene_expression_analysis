@@ -16,6 +16,8 @@ These functions only work with
 I will describe the input data here. You will only be working with RCC files and an associated metadata.csv file  
 - You will need a metadata file with the sample names along with the associated features
 - You will need to read in the counts from the RCC file so they look like this:
+
+  
 ![Screenshot of the application](./Raw_counts_table.png)
 
 
