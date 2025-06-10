@@ -28,20 +28,7 @@ gprofiler <- function(eids){
   return(gprofiletable)
 }
 
-#' gprofiler ontology barplot
-#'
-#' Makes a barplot of the counts in relation to each gene ontology term that comes up using the gprofiler database
-#'
-#' @param gplot
-#' @param num1
-#' @param num2
-#'
-#' @return a barplot of the counts in relation to each gene ontology term.
-#'
-#' @examples
-#' # gprofiler_barplot()
-#'
-#' @export
+#Vestigial function as of now.
 gprofiler_barplot <- function(gplot ,num1, num2){
   top_terms <- gplot$result[num1:num2, ]
   gbarplot <- ggplot(top_terms, aes(x = reorder(term_name, --log10(p_value)), y = -log10(p_value), fill = source)) +
