@@ -1,4 +1,23 @@
-#Makes a new column marking upregulated or downregulated depending on certain values
+#Volcano plotting 
+#By: Paul Parodi
+#Last updated: 6/6/2025
+
+#' Marking regulation
+#'
+#' Makes a new column marking upregulated or downregulated depending on p.value and log fold change
+#'
+#' @param table dataframe of normalized counts
+#' @param col1 Fold change
+#' @param col2 adjusted p. value
+#' @param col1sig significance you care about for adjusted p value
+#' @param col2sig significance you care about for fold change
+#'
+#'
+#' @return a new dataframe which has a column that says upregulated or downregulated
+#'
+#' @examples
+#' regulation_level(dataframe, fold_change_col, adj_pval_col, 2.0, 0.05)
+#'
 #' @export
 regulation_level <- function(table, col1, col2, col1sig, col2sig){
   table$regulation <- "NO"
@@ -7,7 +26,28 @@ regulation_level <- function(table, col1, col2, col1sig, col2sig){
   return(table)
 }
 
-#Plotting the gene expression
+
+
+
+
+
+#' Volcano plotting gene expression
+#'
+#' Volcano plot that shows gene expression that is upregulated or downregulated between groups
+#'
+#' @param table dataframe of normalized counts
+#' @param fc_col Fold change
+#' @param adj_pval_col adjusted p. value
+#' @param fc_cutoff fold change cutoff
+#' @param pvalue p value
+#' @param gene_amount amount of genes you want to be labeled
+#' @param title Title of the plot you are making
+#'
+#' @return Volcano plot showing clearly which genes are upregulated or downregulated based on your parameters
+#'
+#' @examples
+#' regulation_level(dataframe, fold_change_col, adj_pval_col, 2.0, 0.05, 30, 'African Ancestry Vs European Ancestry')
+#'
 #' @export
 volcano_regulation_expression <- function(table, fc_col, adj_pval_col, fc_cutoff, pvalue, gene_amount, title){
   #Creating a regulation column for the table
@@ -25,7 +65,7 @@ volcano_regulation_expression <- function(table, fc_col, adj_pval_col, fc_cutoff
 
   print(table(regulation_table$regulation))
 
-  #Selecting the top 20 most
+  #Selecting the top amount
   regulation_table$delabel <- ifelse(regulation_table$gene_symbol %in% head(regulation_table[order(regulation_table[[adj_pval_col]]), "gene_symbol"], gene_amount), regulation_table$gene_symbol, NA)
 
   labeled_regulation_plot <- ggplot(data = regulation_table , aes(x = logFC, y = -log10(adj.P.Val), col = regulation, label = delabel)) +
