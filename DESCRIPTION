@@ -9,6 +9,20 @@ Authors@R: c(
       role = c("aut", "cre")
     )
   )
+Imports:
+    dplyr,
+    clusterProfiler,
+    org.Hs.eg.db,
+    tidyverse,
+    RColorBrewer,
+    ggrepel,
+    NanoTube,
+    purrr,
+    limma,
+    readr,
+    pheatmap,
+    gprofiler2,
+ 
 Description: More about what it does (maybe more than one line).
     Continuation lines should be indented.
 License: MIT + file LICENSE
