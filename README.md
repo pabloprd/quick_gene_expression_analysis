@@ -6,6 +6,8 @@ so your R code is neater and easier to read. This package specifically only uses
 and multiple differential pairwise gene expression. There are also some plotting functions
 that include a boxplot, barplots, and a good volcano plot. 
 
+This package also has many other dependencies such as: dplyr, tidyverse, clusterprofiler, org.Hs.eg.db, RColorBrewer, ggrepel, NanoTube, purr, limma, readr, pheatmap, gprofiler2. 
+
 ## Workflow
 - Comparing columns with only 2 variables (Pairwise comparison):
   sumstats_and_dge(normalized_counts, metadata, "Feature column", "group1", "group2", "Character the sample starts with")
